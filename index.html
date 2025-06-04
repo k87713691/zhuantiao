@@ -187,6 +187,15 @@
         document.body.style.opacity = '1';
       }, 500);
     }*/
+      //检测是否微信QQ打开
+       (function () {
+      const ua = navigator.userAgent.toLowerCase();
+      if (ua.includes("micromessenger") || ua.includes("qq/")) {
+        document.body.innerHTML = `<div style="padding:2rem;font-size:18px;text-align:center;">请使用系统浏览器打开本页面</div>`;
+        document.body.style.background = '#fff';
+        return;
+      }
+    })();
       // 获取跳转地址
       fetch('https://geturl.35566a.com', {
         method: 'GET',
