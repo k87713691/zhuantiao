@@ -1,97 +1,222 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>线路优化</title>
-<style>
-  body {
-    margin:0; padding:0;
-    height:100vh;
-    font-family: "Microsoft Yahei", "微软雅黑", sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#f5f9ff;
-    color:#1a73e8;
-  }
-  .container {
-    max-width: 320px;
-    text-align:center;
-    padding: 30px;
-    border: 1px solid #1a73e8;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(26,115,232,0.3);
-  }
-  h1 {
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-  p {
-    margin-bottom: 25px;
-    font-size: 16px;
-  }
-  .loader {
-    border: 4px solid #1a73e8;
-    border-top: 4px solid transparent;
-    border-radius: 50%;
-    width: 40px; height: 40px;
-    margin: 0 auto 20px auto;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin {
-    to {transform: rotate(360deg);}
-  }
-  .countdown {
-    font-size: 14px;
-    font-weight: 600;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>适配最优线路</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: "Microsoft YaHei", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #111;
+    }
+    .circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 8px solid #00b400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 20px;
+      position: relative;
+      background: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .circle::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 50%;
+      background: conic-gradient(#00b400 0deg, #00b400 var(--progress, 0deg), #e0e0e0 var(--progress, 0deg));
+      z-index: -1;
+    }
+    .title {
+      font-size: 30px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+    .subtitle {
+      font-size: 18px;
+      color: #00b400;
+      text-align: center;
+      line-height: 1.5;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.2s forwards;
+    }
+    .button {
+      margin-top: 30px;
+      padding: 12px 40px;
+      font-size: 16px;
+      background-color: #00b400;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease 0.4s forwards;
+    }
+    .button:hover {
+      background-color: #009a00;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,180,0,0.3);
+    }
+    .button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .status-text {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #666;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.6s forwards;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .loading {
+      animation: pulse 2s infinite;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>线路优化中</h1>
-    <p>感谢您的耐心等待</p>
-    <div class="loader" aria-label="加载动画"></div>
-    <div class="countdown" id="countdown">3 秒后跳转...</div>
+  <div class="circle loading" id="progress">0</div>
+  <div class="title">适配最优线路</div>
+  <div class="subtitle">
+    正在适配最优线路<br>请稍等
   </div>
-<script>
-(function(){
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes("micromessenger") || ua.includes("qq/")) {
-    document.body.innerHTML = `
-      <div class="container">
-        <h1>请在浏览器中打开</h1>
-        <p>当前页面无法在微信或QQ中打开，请点击右上角选择...“浏览器打开”以继续访问。</p>
-      </div>
-    `;
-    return;
-  }
-
-  let count = 3;
-  const cd = document.getElementById("countdown");
-  const timer = setInterval(() => {
-    count--;
-    if (count > 0) {
-      cd.textContent = count + " 秒后跳转...";
-    } else {
-      clearInterval(timer);
-      fetch('https://geturl.35566a.com/?ts=' + Date.now())
-        .then(res => res.text())
-        .then(base64 => {
+  <div class="status-text" id="statusText">正在检测网络环境...</div>
+  <button class="button" id="enterBtn" onclick="enter()" disabled>立即进入</button>
+  
+  <script>
+    let counter = 0;
+    const progress = document.getElementById('progress');
+    const statusText = document.getElementById('statusText');
+    const enterBtn = document.getElementById('enterBtn');
+    const circle = document.querySelector('.circle');
+    
+    // 状态文本数组
+    const statusMessages = [
+      "正在检测网络环境...",
+      "正在分析网络延迟...",
+      "正在选择最优节点...",
+      "正在建立安全连接...",
+      "正在优化传输协议...",
+      "适配完成，准备就绪！"
+    ];
+    
+    let messageIndex = 0;
+    
+    // 更新状态文本
+    const statusInterval = setInterval(() => {
+      if (messageIndex < statusMessages.length - 1) {
+        messageIndex++;
+        statusText.textContent = statusMessages[messageIndex];
+      }
+    }, 400);
+    
+    // 进度更新
+    const interval = setInterval(() => {
+      counter++;
+      progress.textContent = counter;
+      
+      // 更新圆形进度条
+      const progressDegree = (counter / 100) * 360;
+      circle.style.setProperty('--progress', progressDegree + 'deg');
+      
+      if (counter >= 100) {
+        clearInterval(interval);
+        clearInterval(statusInterval);
+        statusText.textContent = statusMessages[statusMessages.length - 1];
+        
+        // 启用按钮
+        setTimeout(() => {
+          enterBtn.disabled = false;
+          enterBtn.textContent = "立即进入";
+          circle.classList.remove('loading');
+        }, 500);
+      }
+    }, 30); // 稍微调慢一点，让用户看清状态变化
+    
+    function enter() {
+      // 添加进入动画效果
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.5s ease';
+      
+      /*setTimeout(() => {
+        alert("进入主页面！");
+        // 实际项目中取消注释下面这行
+        // location.href = "/main";
+        
+        // 演示用：重置页面
+        document.body.style.opacity = '1';
+      }, 500);
+    }*/
+      // 获取跳转地址
+      fetch('https://geturl.35566a.com', {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/plain'
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            if (response.status === 403) {
+              throw new Error('请使用系统浏览器打开');
+            }
+            throw new Error('服务暂时不可用，请稍后再试');
+          }
+          return response.text();
+        })
+        .then(base64Url => {
           try {
-            const url = atob(base64.trim());
-            location.href = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
-          } catch(e) {
-            cd.textContent = "跳转失败，请刷新重试";
+            const targetUrl = atob(base64Url);
+            // 跳转到目标网址
+            window.location.href = targetUrl;
+          } catch (e) {
+            throw new Error('解析地址失败，请稍后再试');
           }
         })
-        .catch(() => {
-          cd.textContent = "跳转失败，请检查网络";
+        .catch(error => {
+          document.body.style.opacity = '1';
+          alert(error.message);
         });
     }
-  }, 1000);
-})();
-</script>
+  </script>
 </body>
 </html>
